@@ -95,7 +95,7 @@ task automatic unpack_entry(
     input  logic [SRAM_W-1:0] word,
     output logic valid,
     output logic [TAG_W-1:0] tag,
-    output logic [NUM_NODES-1:0] checkout_vec,
+    output logic [NUM_NODES-1:0] checkout_vec
 );
     checkout_vec = word[2*NUM_NODES-1 : NUM_NODES];
     tag = word[2*NUM_NODES + TAG_W - 1 : 2*NUM_NODES];
@@ -105,7 +105,7 @@ endtask
 function automatic logic [SRAM_W-1:0] pack_entry(
     input logic valid,
     input logic [TAG_W-1:0] tag,
-    input logic [NUM_NODES-1:0] checkout_vec,
+    input logic [NUM_NODES-1:0] checkout_vec
 );
     return {valid, tag, checkout_vec};
 endfunction
@@ -264,7 +264,7 @@ always_comb begin
     write_packed_word = pack_entry(
         mod_write_q.new_valid,
         mod_write_q.tag,
-        mod_write_q.new_checkout,
+        mod_write_q.new_checkout
     );
 
     // ---- Sequencer FSM ----
