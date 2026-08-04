@@ -228,11 +228,28 @@ module tb_memory_bank;
         logic [NUM_NODES-1:0] t_worker [20];
         logic [1:0] t_req_type [20];
 
-        for(int i = 0; i < 20; i ++) begin
+        // stuff in 6 unrelated writes to addr 0000 first to keep buffer busy
+        for(int i = 0; i < 6; i ++) begin
             t_addr[i] = 64'h0000_0000_0000_0000;
-            t_data[i] = 64'h0000_0000_0000_000A + i;
+            t_data[i] = 64'h0000_0000_0000_0100;
             t_worker[i] = 1'b0;
-            t_req_type[i] = 2'b1;
+            t_req_type[i] = 2'b10;
+        end
+
+        // 5 writes to addr 0001
+        for(int i = 6; i < 11; i ++) begin
+            t_addr[i] = 64'h1000_0000_0000_0000;
+            t_data[i] = 64'h0000_0000_0000_0100 + i;
+            t_worker[i] = 1'b0;
+            t_req_type[i] = 2'b10;
+        end
+
+        // reads addr 0001
+        for(int i = 11; i < 16; i ++) begin
+            t_addr[i] = 64'h1000_0000_0000_0000; // read from same addresses
+            t_data[i] = 64'h0000_0000_0000_0100 + i - 5; // irrelevant
+            t_worker[i] = 1'b0;
+            t_req_type[i] = 2'b0;
         end
 
         do_reset();
@@ -241,14 +258,14 @@ module tb_memory_bank;
         $dumpfile("tb_memory_bank.vcd");
         $dumpvars(0, tb_memory_bank);
 
-        $display("[T1] simple push from arbiter into bank router");
-        for(int i = 0; i < 20; i ++) begin
-            br_push(1, 0, t_addr[i], t_data[i], t_worker[i], t_req_type[i]);
+        $display("Load forwarding test");
+        for(int i = 0; i < 16; i ++) begin
+            if(t_req_type[i] == 2'b10) // commit
+                br_push(1, 1, t_addr[i], t_data[i], t_worker[i], t_req_type[i]);
+            else
+                br_push(1, 0, t_addr[i], t_data[i], t_worker[i], t_req_type[i]);
         end
-    
-        // Test when the buffer gets full the ready signal stalls
-
-
+        
         repeat(50) @(posedge clk); #1;
 
         $finish;
