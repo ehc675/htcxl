@@ -7,6 +7,7 @@
 module wr_arbiter #(
     parameter int DATA_W = 64,
     parameter int ADDR_W = 64,
+    parameter int NUM_BANKS = 4,
 
     parameter int NUM_NODES = 4,
     parameter int RELEASE_SET_DEPTH = 16,
@@ -30,6 +31,7 @@ module wr_arbiter #(
     output logic done_o,
 
     // Input from the memory buffer
+    // Now NUM_BANKS channels to avoid having one bank's fullness halting pushing to non-full buffers
     input logic push_ready_i,
 
     // Output to the memory buffer
@@ -109,7 +111,7 @@ module wr_arbiter #(
                     (accept_beat && req_type_q == CMD_LOAD); // single load beat
     always_ff @(posedge clk_i or posedge rst_i) begin
         if (rst_i) begin
-            busy_q        <= 1'b0;
+            busy_q <= 1'b0;
             release_ptr_q <= '0;
         end else begin
             if (!busy_q) begin

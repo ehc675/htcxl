@@ -25,6 +25,7 @@ module bank_router #(
     input logic [DATA_W-1:0] in_wdata_i,
     input logic [NUM_NODES-1:0] in_worker_i,
     input logic [1:0] in_req_type_i,
+    
     output logic in_ready_o, // tells the arbiter whether it is ready
 
     // I/o with the NUM_BANKS wr_buf instances
@@ -34,6 +35,7 @@ module bank_router #(
     output logic [DATA_W-1:0] bank_wdata_o, // broadcast
     output logic [NUM_NODES-1:0] bank_worker_o, // broadcast
     output logic [1:0] bank_req_type_o, // broadcast
+
     input logic [NUM_BANKS-1:0] bank_ready_i // per-bank push_ready_o
 );
 
@@ -57,6 +59,7 @@ module bank_router #(
     end
 
     // Ready mux: the arbiter only advances when the targeted bank can accept.
+    // In other words, it just relays the ready signal from the buffer arbiter
     assign in_ready_o = bank_ready_i[sel];
 
 endmodule

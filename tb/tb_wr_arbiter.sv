@@ -195,7 +195,7 @@ module tb_wr_arbiter;
         addr = '0;
         is_write = '0;
         data = '0;
-        
+
         for(i = 0; i < num_entries; i++) begin
             addr[i] = ADDR_W'('hA000 + i); // [A000, A001, A002, A003, ...]
             data[i] = DATA_W'('hD000 + i); // [D000, D001, D002, D003, ...]
