@@ -131,7 +131,6 @@ module wr_buf #(
         entry_to_write.worker = push_worker_i;
         entry_to_write.req_type = push_req_type_i;
     end
-    assign resp_rdata_o = mem_rdata_i;
 
     // Sequential Logic
     always_ff @(posedge clk_i or posedge rst_i) begin
@@ -143,6 +142,7 @@ module wr_buf #(
             inflight_worker <= '0;
             resp_valid_o <= 1'b0;
             resp_worker_o <= '0;
+            resp_rdata_o <= '0;
             fwd_valid_o <= 1'b0;
             fwd_worker_o <= '0;
             fwd_rdata_o <= '0;
@@ -158,11 +158,16 @@ module wr_buf #(
                 fwd_rdata_o  <= fwd_match_data;
             end
 
-            // Memory response returned, relay to node
+            // Memory response returned, relay to node.
+            // Latch data with the tag on the SAME cycle so valid/worker/rdata
+            // all leave the flop together, describing the same load. Sampling
+            // mem_rdata_i here (while mem_ready_i is high) captures the correct
+            // value; a combinational passthrough would present next-cycle bus data.
             if (req_in_flight && mem_ready_i) begin
                 req_in_flight <= 1'b0;
                 resp_valid_o <= 1'b1; // one-cycle pulse
                 resp_worker_o <= inflight_worker;
+                resp_rdata_o <= mem_rdata_i;
             end
 
             // Push (writes and miss-loads only)

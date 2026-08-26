@@ -200,7 +200,9 @@ module cxl_controller #(
                 release_data_o = mod_req_q.release_data;
                 mem_worker_o = mod_req_q.worker;
                 mem_req_type_o = mod_req_q.request_type;
-                // optional: signal COMP_COMMIT here if nodes consume commit acks
+                // signal COMP_COMMIT here if nodes consume commit acks
+                resp_valid_o  = mod_req_q.valid ? mod_req_q.worker : '0;
+                comp_signal_o = COMP_COMMIT;
             end
         end
 
